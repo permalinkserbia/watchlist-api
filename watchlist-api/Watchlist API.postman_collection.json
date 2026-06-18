@@ -1,0 +1,75 @@
+{
+	"info": {
+		"_postman_id": "554962ce-41ec-4a13-85de-e2bf95419b1f",
+		"name": "Watchlist API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18954041",
+		"_collection_link": "https://dimitrije-drakulic.postman.co/workspace/Dimitrije-Drakulic-Workspace~0a2cabe5-3424-4b95-b1fd-15055567ef34/collection/18954041-554962ce-41ec-4a13-85de-e2bf95419b1f?action=share&source=collection_link&creator=18954041"
+	},
+	"item": [
+		{
+			"name": "Register request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Nenad \",\n    \"email\": \"office@permalink1.rs\",\n    \"password\": \"erwerwer\",\n    \"password_confirmation\": \"Dzomb@spfcnova123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/register",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"office@permalink1.rs\",\n    \"password\": \"erwerwer\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/login",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

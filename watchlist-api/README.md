@@ -1,58 +1,253 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Watchlist API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API za upravljanje ličnom listom filmova. Korisnici mogu da se registruju, prijave i dodaju filmove na watchlist koristeći IMDb ID. Podaci o filmovima se automatski preuzimaju sa [OMDB API](https://www.omdbapi.com/) servisa.
 
-## About Laravel
+## Tehnologije
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Tehnologija | Verzija | Namena |
+|---|---|---|
+| PHP | ^8.3 | Backend jezik |
+| Laravel | ^13.8 | Web framework |
+| Laravel Sanctum | ^4.0 | API autentifikacija (Bearer token) |
+| MySQL / SQLite | — | Relaciona baza podataka |
+| OMDB API | — | Spoljni servis za podatke o filmovima |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Dev alati
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel Pint** — formatiranje PHP koda
+- **PHPUnit** — automatsko testiranje (`php artisan test`)
+- **Postman** — ručno testiranje API-ja preko kolekcije
+- **Laravel Pail** — logovanje u development okruženju
 
-## Learning Laravel
+## Testiranje
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### PHPUnit
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd watchlist-api
+php artisan test
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Postman kolekcija
 
-## Contributing
+Za ručno testiranje API-ja u Postman-u, u projektu je dostupna gotova kolekcija:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+watchlist-api/Watchlist API.postman_collection.json
+```
 
-## Code of Conduct
+**Kako koristiti:**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Otvori Postman
+2. Klikni **Import** i uvezi fajl `Watchlist API.postman_collection.json`
+3. Pokreni Laravel server: `php artisan serve`
+4. Prvo pošalji **Register** ili **Login** zahtev da dobiješ Bearer token
+5. Token postavi u Authorization → Bearer Token za zaštićene rute
 
-## Security Vulnerabilities
+Kolekcija koristi `http://127.0.0.1:8000` kao bazni URL.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Arhitektura
 
-## License
+Projekat prati slojevitu arhitekturu:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+Controller → Service → Repository → Model
+```
+
+| Sloj | Odgovornost |
+|---|---|
+| **Controller** | Validacija zahteva, poziv servisa, JSON odgovor |
+| **Service** | Poslovna logika (`OmdbMovieService`, `WatchlistService`) |
+| **Repository** | Kompleksni upiti ka bazi (`MovieRepository`, `WatchlistItemRepository`) |
+| **Provider** | Integracija sa OMDB API-jem (`OmdbMovieProvider`) |
+
+## Instalacija
+
+```bash
+cd watchlist-api
+
+composer install
+
+cp .env.example .env
+php artisan key:generate
+
+# Podesi bazu u .env fajlu, zatim:
+php artisan migrate
+
+php artisan serve
+```
+
+API je dostupan na `http://127.0.0.1:8000/api`.
+
+## Konfiguracija (.env)
+
+Za testiranje možeš koristiti sledeći OMDB API ključ:
+
+```env
+OMDB_API_KEY=3cbad630
+```
+
+Primer minimalne `.env` konfiguracije:
+
+```env
+APP_NAME=WatchlistAPI
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=watchlist_api
+DB_USERNAME=root
+DB_PASSWORD=
+
+OMDB_API_KEY=3cbad630
+```
+
+## Autentifikacija
+
+API koristi Laravel Sanctum sa Bearer tokenom. Neautentifikovani zahtevi na zaštićene rute vraćaju `401` u JSON formatu.
+
+```
+Authorization: Bearer {token}
+```
+
+Token se dobija pri registraciji ili prijavi.
+
+---
+
+## API rute
+
+### Autentifikacija
+
+#### Registracija
+
+```http
+POST /api/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+```
+
+**Odgovor (201):**
+
+```json
+{
+  "user": { "id": 1, "name": "John Doe", "email": "john@example.com" },
+  "token": "1|..."
+}
+```
+
+#### Prijava
+
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+#### Odjava
+
+```http
+POST /api/logout
+Authorization: Bearer {token}
+```
+
+#### Trenutni korisnik
+
+```http
+GET /api/user
+Authorization: Bearer {token}
+```
+
+---
+
+### Watchlist
+
+#### Lista filmova
+
+```http
+GET /api/watchlist
+Authorization: Bearer {token}
+
+# Opciono filtriranje po statusu:
+GET /api/watchlist?status=pending
+```
+
+Mogući statusi: `pending`, `watched`, `skipped`.
+
+#### Dodavanje filma
+
+Film se preuzima sa OMDB servisa po IMDb ID-u i čuva u bazi. `rating` se automatski popunjava iz OMDB odgovora.
+
+```http
+POST /api/watchlist
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "imdb_id": "tt0111161",
+  "status": "pending",
+  "notes": "Must watch"
+}
+```
+
+**Primer IMDb ID-eva za testiranje:**
+
+| Film | IMDb ID |
+|---|---|
+| The Shawshank Redemption | `tt0111161` |
+| The Godfather | `tt0068646` |
+| The Dark Knight | `tt0468569` |
+
+#### Ažuriranje stavke
+
+```http
+PUT /api/watchlist/{id}
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "status": "watched",
+  "notes": "Odličan film"
+}
+```
+
+#### Uklanjanje sa watchlist-e
+
+```http
+DELETE /api/watchlist/{id}
+Authorization: Bearer {token}
+```
+
+**Odgovor:**
+
+```json
+{
+  "message": "Movie removed from watchlist"
+}
+```
+
+---
+
+## Modeli
+
+### Movie
+
+Podaci preuzeti sa OMDB servisa: `title`, `external_id`, `year`, `genre`, `poster`, `plot`, `runtime`, `imb_rating`, `status`.
+
+### WatchlistItem
+
+Korisnička stavka na listi: `movie_id`, `user_id`, `status`, `rating` (iz OMDB-a), `notes`.
+
+## Licenca
+
+MIT

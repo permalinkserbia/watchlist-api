@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('movie_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['pending', 'watched', 'skipped'])->default('pending');
-            $table->integer('rating');
+            $table->string('rating')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

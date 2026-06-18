@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->bigInteger('external_id')->unique();
-            $table->string('title');
             $table->string('year');
             $table->string('genre');
             $table->string('poster');
-            $table->string('plot');
-            $table->string('poster');
+            $table->text('plot');
             $table->string('runtime');
             $table->string('imb_rating');
             $table->string('status');
